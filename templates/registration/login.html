@@ -5,7 +5,14 @@
 {% block content %}
 <div class="flex min-h-[60vh] items-center justify-center">
   <div class="w-full max-w-sm">
-    <h1 class="text-2xl font-semibold text-center mb-8 text-gray-800">heddle</h1>
+    <div class="login-lockup">
+      {% load static %}
+      <span class="login-mark">
+        <img src="{% static 'img/wire-loom.png' %}" alt="">
+      </span>
+      <h1>Welcome to heddle</h1>
+      <p>EcoWeaver engagement data, woven with provenance.</p>
+    </div>
 
     <form method="post" class="bg-white shadow-sm rounded-lg border border-gray-200 p-8 space-y-5">
       {% csrf_token %}

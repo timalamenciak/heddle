@@ -106,6 +106,13 @@ class TestLogin:
         response = client.get("/accounts/login/")
         assert response.status_code == 200
 
+    def test_login_page_includes_brand_icon_and_attribution(self, client):
+        response = client.get("/accounts/login/")
+        content = response.content.decode()
+        assert "img/wire-loom.png" in content
+        assert "wire loom by fahrud from Noun Project" in content
+        assert "creativecommons.org/licenses/by/3.0/" in content
+
     def test_valid_login_redirects_to_dashboard(self, client, viewer):
         response = client.post(
             "/accounts/login/",

@@ -29,7 +29,7 @@ is not inferred.
 | JOSS-15 | PASS | `requirements*.txt` pin all transitive versions with hashes; Docker base is digest-pinned. | — |
 | JOSS-16 | WARNING | `.github/workflows/ci.yml` installs locked dependencies and builds the image, but no CI run exists because this directory has no Git repository. | Initialize Git and require passing CI. |
 | JOSS-17 | PASS | `LICENSE` contains the standard MIT License grant and conditions. | — |
-| JOSS-18 | PASS | `LICENSE` states `Copyright (c) 2026 Tim Alamenciak`. | — |
+| JOSS-18 | PASS | `LICENSE` states `Copyright (c) 2026 Heddle contributors`. | — |
 | JOSS-19 | PASS | Automated unit, view, integration, security-regression, and end-to-end tests exist. | — |
 | JOSS-20 | PASS | `546 passed`; coverage gate passed at 91.45%. | — |
 | JOSS-21 | PASS | Major import, metadata, RBAC, event, export, privacy, enrichment, and KGX behavior is covered; `tests/test_e2e.py` composes the workflow. | — |

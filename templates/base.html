@@ -4,64 +4,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#112e3b">
   <title>{% block title %}heddle{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{% static 'img/wire-loom.png' %}">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <script src="{% static 'vendor/htmx-1.9.12.min.js' %}" defer></script>
 </head>
-<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
+<body class="app-shell min-h-screen flex flex-col">
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
-  {% if user.is_authenticated %}
-  <nav class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-6">
-      <a href="/" class="text-lg font-semibold tracking-tight text-indigo-700">heddle</a>
-      <nav class="flex items-center gap-4 text-sm text-gray-600">
-        <a href="{% url 'core:person_list' %}" class="hover:text-indigo-600">People</a>
-        <a href="{% url 'core:organization_list' %}" class="hover:text-indigo-600">Organizations</a>
-        <a href="{% url 'events:event_list' %}" class="hover:text-indigo-600">Events</a>
-        <a href="{% url 'events:segment_list' %}" class="hover:text-indigo-600">Segments</a>
+  <header class="site-header">
+    <div class="site-header__top">
+      <a href="/" class="site-brand" aria-label="heddle home">
+        <span class="site-brand__mark">
+          <img src="{% static 'img/wire-loom.png' %}" alt="">
+        </span>
+        <span class="site-brand__words">
+          <strong>heddle</strong>
+          <small>an EcoWeaver tool</small>
+        </span>
+      </a>
+
+      {% if user.is_authenticated %}
+      <div class="account-cluster">
+        <span class="account-cluster__email">{{ user.email }}</span>
+        <span class="role-badge">{{ user.get_role_display }}</span>
+        {% if user.is_staff %}
+        <a href="/admin/" class="account-link">Admin</a>
+        {% endif %}
+        <form method="post" action="/accounts/logout/">
+          {% csrf_token %}
+          <button type="submit" class="account-link account-link--button">Log out</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="site-header__nav-row">
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="{% url 'core:person_list' %}" class="site-nav__link">People</a>
+        <a href="{% url 'core:organization_list' %}" class="site-nav__link">Organizations</a>
+        <a href="{% url 'events:event_list' %}" class="site-nav__link">Events</a>
+        <a href="{% url 'events:segment_list' %}" class="site-nav__link">Segments</a>
         {% if user.role != 'viewer' %}
-        <a href="{% url 'importer:upload' %}" class="hover:text-indigo-600">Import</a>
-        <a href="{% url 'exporter:export_people' %}" class="hover:text-indigo-600">Export</a>
-        <a href="{% url 'metadata:dashboard' %}" class="hover:text-indigo-600">Quality</a>
-        <a href="{% url 'metadata:suggestions' %}" class="hover:text-indigo-600">Suggestions</a>
-        <a href="{% url 'graph:export_index' %}" class="hover:text-indigo-600">Graph</a>
+        <span class="site-nav__divider" aria-hidden="true"></span>
+        <a href="{% url 'importer:upload' %}" class="site-nav__link">Import</a>
+        <a href="{% url 'exporter:export_people' %}" class="site-nav__link">Export</a>
+        <a href="{% url 'metadata:dashboard' %}" class="site-nav__link">Quality</a>
+        <a href="{% url 'metadata:suggestions' %}" class="site-nav__link">Suggestions</a>
+        <a href="{% url 'graph:export_index' %}" class="site-nav__link site-nav__link--accent">Graph</a>
         {% endif %}
       </nav>
     </div>
-    <div class="flex items-center gap-4 text-sm">
-      <span class="text-gray-500">{{ user.email }}</span>
-      <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
-        {{ user.get_role_display }}
-      </span>
-      {% if user.is_staff %}
-      <a href="/admin/" class="text-gray-600 hover:text-indigo-600">Admin</a>
-      {% endif %}
-      <form method="post" action="/accounts/logout/">
-        {% csrf_token %}
-        <button type="submit" class="text-gray-600 hover:text-red-600">Log out</button>
-      </form>
-    </div>
-  </nav>
-  {% endif %}
-
-  <main class="flex-1 px-4 py-8 max-w-5xl mx-auto w-full">
-
-    {% if messages %}
-    <div class="mb-6 space-y-2">
-      {% for message in messages %}
-      <div class="rounded-md px-4 py-3 text-sm
-        {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200
-        {% elif message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200
-        {% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-700 border border-yellow-200
-        {% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
-        {{ message }}
-      </div>
-      {% endfor %}
-    </div>
     {% endif %}
+  </header>
 
-    {% block content %}{% endblock %}
+  <main id="main-content" class="app-main flex-1 w-full">
+    <div class="app-main__inner">
+      {% if messages %}
+      <div class="mb-6 space-y-2" aria-live="polite">
+        {% for message in messages %}
+        <div class="rounded-md px-4 py-3 text-sm
+          {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200
+          {% elif message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200
+          {% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-700 border border-yellow-200
+          {% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </div>
   </main>
 
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <p><strong>heddle</strong> keeps EcoWeaver engagement metadata trustworthy.</p>
+      <p class="site-footer__attribution">
+        <a href="https://thenounproject.com/browse/icons/term/wire-loom/" target="_blank" rel="noopener noreferrer">wire loom by fahrud from Noun Project</a>
+        (<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>)
+      </p>
+    </div>
+  </footer>
 </body>
 </html>

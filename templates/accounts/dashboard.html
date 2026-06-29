@@ -2,15 +2,20 @@
 {% block title %}Dashboard — heddle{% endblock %}
 
 {% block content %}
-<div class="mb-6">
-  <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
-  <p class="text-sm text-gray-500 mt-1">EcoWeaver engagement CRM — metadata quality at a glance.</p>
+{% load static %}
+<div class="dashboard-hero mb-6">
+  <div>
+    <p class="dashboard-hero__eyebrow">EcoWeaver engagement CRM</p>
+    <h1>Metadata you can trust.</h1>
+    <p class="text-sm text-gray-500 mt-2">Provenance, participation, and quality at a glance.</p>
+  </div>
+  <img class="dashboard-hero__mark" src="{% static 'img/wire-loom.png' %}" alt="">
 </div>
 
 <!-- Summary cards -->
 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
 
-  <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+  <div class="metric-card bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">People</p>
     <p class="mt-1 text-3xl font-bold text-gray-900">{{ people.total }}</p>
     <p class="text-xs text-gray-500 mt-1">
@@ -24,13 +29,13 @@
     </p>
   </div>
 
-  <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+  <div class="metric-card bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Consent</p>
     <p class="mt-1 text-3xl font-bold text-gray-900">{{ people.consent_contact }}</p>
     <p class="text-xs text-gray-500 mt-1">can contact · {{ people.consent_public }} public profile</p>
   </div>
 
-  <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm
+  <div class="metric-card bg-white rounded-lg border border-gray-200 p-4 shadow-sm
     {% if issues.critical > 0 %}border-red-300 bg-red-50{% endif %}">
     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Open issues</p>
     <p class="mt-1 text-3xl font-bold {% if issues.critical > 0 %}text-red-700{% else %}text-gray-900{% endif %}">
@@ -49,7 +54,7 @@
     {% endif %}
   </div>
 
-  <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+  <div class="metric-card bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Events</p>
     <p class="mt-1 text-3xl font-bold text-gray-900">{{ total_events }}</p>
     <p class="text-xs text-gray-500 mt-1">
