@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Export people — heddle{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-xl font-semibold text-gray-800">Export people</h1>
+  <p class="text-sm text-gray-500 mt-1">
+    Choose columns and download a CSV. Email and private notes are excluded by default.
+  </p>
+</div>
+
+<form method="post" class="max-w-xl space-y-5">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+  <div class="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+    {{ form.non_field_errors }}
+  </div>
+  {% endif %}
+
+  <div class="bg-white border border-gray-200 rounded-lg p-5">
+    <h2 class="text-sm font-semibold text-gray-700 mb-3">Columns to include</h2>
+    {% if form.columns.errors %}
+    <p class="text-xs text-red-600 mb-2">{{ form.columns.errors.0 }}</p>
+    {% endif %}
+    <div class="space-y-1.5">
+      {% for checkbox in form.columns %}
+      <label class="flex items-center gap-2 text-sm text-gray-700">
+        {{ checkbox.tag }} {{ checkbox.choice_label }}
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-lg p-5">
+    <h2 class="text-sm font-semibold text-gray-700 mb-3">Options</h2>
+    <label class="flex items-center gap-2 text-sm text-gray-700">
+      {{ form.include_bom }} {{ form.include_bom.label }}
+    </label>
+  </div>
+
+  <div>
+    <button type="submit"
+            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500">
+      Download CSV
+    </button>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}{{ event.name }} — heddle{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb" class="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
+  <a href="{% url 'accounts:dashboard' %}" class="hover:text-indigo-600">Home</a>
+  <span>/</span>
+  <a href="{% url 'events:event_list' %}" class="hover:text-indigo-600">Events</a>
+  <span>/</span>
+  <span class="text-gray-600">{{ event.name }}</span>
+</nav>
+<div class="flex items-start justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-semibold">{{ event.name }}</h1>
+    <p class="text-sm text-gray-500 mt-1">
+      {{ event.get_event_type_display }}
+      {% if event.start_date %} · {{ event.start_date }}{% if event.end_date %} – {{ event.end_date }}{% endif %}{% endif %}
+      {% if event.location %} · {{ event.location }}{% endif %}
+    </p>
+  </div>
+  {% if can_edit %}
+  <a href="{% url 'events:event_edit' pk=event.pk %}"
+     class="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50">
+    Edit event
+  </a>
+  {% endif %}
+</div>
+
+{% if event.description %}
+<p class="text-sm text-gray-700 mb-6">{{ event.description }}</p>
+{% endif %}
+
+<!-- Add participant form -->
+{% if can_edit %}
+<details class="mb-6 rounded-lg border border-gray-200 bg-white">
+  <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-gray-700 select-none">
+    Add participant
+  </summary>
+  <div class="border-t border-gray-100 px-4 py-4">
+    <form method="post" action="{% url 'events:participation_add' pk=event.pk %}"
+          class="flex flex-wrap gap-3 items-end">
+      {% csrf_token %}
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Person</label>
+        {{ add_form.person }}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Role</label>
+        {{ add_form.role }}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
+        {{ add_form.status }}
+      </div>
+      <button type="submit"
+              class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm text-white hover:bg-indigo-700">
+        Add
+      </button>
+    </form>
+  </div>
+</details>
+{% endif %}
+
+<!-- Roster -->
+<div class="flex items-center justify-between mb-3">
+  <h2 class="text-lg font-semibold">
+    Roster <span class="ml-1 text-sm font-normal text-gray-500">({{ participations.count }})</span>
+  </h2>
+</div>
+
+{% if participations %}
+<form method="post" action="{% url 'events:participation_bulk' pk=event.pk %}"
+      id="roster-form">
+  {% csrf_token %}
+  <div class="overflow-x-auto rounded-lg border border-gray-200 mb-3">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+        <tr>
+          {% if can_edit %}<th class="px-3 py-3 w-6"></th>{% endif %}
+          <th class="px-4 py-3">Person</th>
+          <th class="px-4 py-3">Organization</th>
+          <th class="px-4 py-3">Role</th>
+          <th class="px-4 py-3">Status</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 bg-white">
+        {% for p in participations %}
+        <tr class="hover:bg-gray-50">
+          {% if can_edit %}
+          <td class="px-3 py-3">
+            <input type="checkbox" name="participation_ids" value="{{ p.pk }}"
+                   class="rounded border-gray-300 text-indigo-600">
+          </td>
+          {% endif %}
+          <td class="px-4 py-3 font-medium">
+            <a href="{% url 'core:person_detail' pk=p.person.pk %}"
+               class="text-indigo-600 hover:underline">{{ p.person }}</a>
+          </td>
+          <td class="px-4 py-3 text-gray-600">
+            {{ p.person.primary_organization|default:"—" }}
+          </td>
+          <td class="px-4 py-3 text-gray-600">{{ p.get_role_display }}</td>
+          <td class="px-4 py-3">
+            <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium
+              {% if p.status == 'confirmed' or p.status == 'attended' %}bg-green-50 text-green-700
+              {% elif p.status == 'declined' or p.status == 'cancelled' %}bg-red-50 text-red-700
+              {% elif p.status == 'invited' %}bg-blue-50 text-blue-700
+              {% else %}bg-gray-100 text-gray-600{% endif %}">
+              {{ p.get_status_display }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if can_edit %}
+  <div class="flex items-center gap-3">
+    <label class="text-sm text-gray-600">Update selected to:</label>
+    <select name="new_status"
+            class="rounded border-gray-300 text-sm py-1 px-2">
+      {% for val, label in bulk_form.fields.new_status.choices %}
+      <option value="{{ val }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit"
+            class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm text-white hover:bg-indigo-700">
+      Apply
+    </button>
+  </div>
+  {% endif %}
+</form>
+{% else %}
+<div class="rounded-lg border border-dashed border-gray-300 py-10 text-center text-sm text-gray-500">
+  No participants yet.
+</div>
+{% endif %}
+{% endblock %}

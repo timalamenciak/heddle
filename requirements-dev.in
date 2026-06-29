@@ -1,0 +1,10 @@
+-r requirements.in
+
+pytest>=8.2
+pytest-django>=4.8
+pytest-cov>=5.0
+ruff>=0.4
+mypy>=1.10
+django-stubs[compatible-mypy]>=5.0
+pip-audit>=2.9
+bandit>=1.8

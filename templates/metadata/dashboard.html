@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Metadata quality — heddle{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
+  <a href="{% url 'accounts:dashboard' %}" class="hover:text-indigo-600">Home</a>
+  <span>/</span>
+  <span class="text-gray-600">Quality</span>
+</nav>
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-xl font-semibold text-gray-800">Metadata quality</h1>
+  <form method="post" action="{% url 'metadata:run_checks' %}">
+    {% csrf_token %}
+    <button type="submit"
+            class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500">
+      Run checks now
+    </button>
+  </form>
+</div>
+
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+  <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+    <p class="text-2xl font-semibold text-gray-800">{{ total_people }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Total people</p>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+    <p class="text-2xl font-semibold text-yellow-600">{{ people_with_open }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">People with open issues</p>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+    <p class="text-2xl font-semibold text-red-600">{{ critical_count }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">People with critical issues</p>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+    <p class="text-2xl font-semibold text-gray-600">{{ total_open_issues }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Total open issues</p>
+  </div>
+</div>
+
+{% if person_scores %}
+<div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+  <div class="px-4 py-3 border-b border-gray-100">
+    <h2 class="text-sm font-semibold text-gray-700">People by quality score (lowest first)</h2>
+    <p class="text-xs text-gray-500 mt-0.5">
+      Score = 100 minus the sum of weights for all open issues.
+    </p>
+  </div>
+  <table class="min-w-full text-sm">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Person</th>
+        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Score</th>
+        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Open issues</th>
+        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Action</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for entry in person_scores %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2">
+          <a href="{% url 'core:person_detail' pk=entry.person.pk %}"
+             class="font-medium text-indigo-600 hover:text-indigo-500">
+            {{ entry.person.full_name }}
+          </a>
+          {% if entry.has_critical %}
+          <span class="ml-1 inline-flex items-center rounded-full bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-700">
+            critical
+          </span>
+          {% endif %}
+        </td>
+        <td class="px-4 py-2">
+          <span class="font-semibold
+            {% if entry.score >= 80 %}text-green-600
+            {% elif entry.score >= 50 %}text-yellow-600
+            {% else %}text-red-600{% endif %}">
+            {{ entry.score }}
+          </span>
+          <span class="text-gray-400 text-xs">/100</span>
+        </td>
+        <td class="px-4 py-2 text-gray-700">{{ entry.open_issues }}</td>
+        <td class="px-4 py-2">
+          <a href="{% url 'core:person_detail' pk=entry.person.pk %}"
+             class="text-xs text-indigo-600 hover:text-indigo-500">
+            View →
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-gray-500 text-sm py-8 text-center">
+  No quality data yet. Click "Run checks now" to analyse your records.
+</p>
+{% endif %}
+{% endblock %}

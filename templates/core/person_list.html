@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}People — heddle{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-xl font-semibold text-gray-800">People
+    <span class="ml-2 text-sm font-normal text-gray-500">({{ total }})</span>
+  </h1>
+  {% if user.role != 'viewer' %}
+  <a href="{% url 'core:person_create' %}"
+     class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500">
+    + Add person
+  </a>
+  {% endif %}
+</div>
+
+<form id="filter-form"
+      hx-get="{% url 'core:person_list' %}"
+      hx-target="#person-results"
+      hx-push-url="true"
+      hx-trigger="submit, change delay:400ms"
+      class="bg-white border border-gray-200 rounded-lg p-4 mb-6 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+
+  <div>
+    <label class="block text-xs font-medium text-gray-600 mb-1">Search</label>
+    {{ form.q.as_widget }}
+  </div>
+  <div>
+    <label class="block text-xs font-medium text-gray-600 mb-1">Country</label>
+    {{ form.country.as_widget }}
+  </div>
+  <div>
+    <label class="block text-xs font-medium text-gray-600 mb-1">Continent</label>
+    {{ form.continent.as_widget }}
+  </div>
+  <div>
+    <label class="block text-xs font-medium text-gray-600 mb-1">Organization</label>
+    {{ form.organization.as_widget }}
+  </div>
+  <div>
+    <label class="block text-xs font-medium text-gray-600 mb-1">Metadata status</label>
+    {{ form.metadata_status.as_widget }}
+  </div>
+  <div class="flex items-end gap-4">
+    <label class="flex items-center gap-2 text-sm text-gray-700">
+      {{ form.missing_orcid }} Missing ORCID
+    </label>
+  </div>
+  <div class="flex items-end">
+    <button type="submit"
+            class="w-full px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500">
+      Filter
+    </button>
+  </div>
+</form>
+
+<div id="person-results">
+  {% include "core/person_list_results.html" %}
+</div>
+{% endblock %}

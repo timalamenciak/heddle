@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}{{ pub.title|truncatechars:60 }} — heddle{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
+  <a href="{% url 'accounts:dashboard' %}" class="hover:text-indigo-600">Home</a>
+  <span>/</span>
+  <span class="text-gray-600">{{ pub.title|truncatechars:50 }}</span>
+</nav>
+
+<div class="flex items-start justify-between mb-6">
+  <div class="flex-1 min-w-0 pr-4">
+    <h1 class="text-xl font-semibold text-gray-800 leading-snug">{{ pub.title }}</h1>
+    {% if pub.year %}
+    <p class="text-sm text-gray-500 mt-0.5">{{ pub.year }}{% if pub.venue %} &mdash; {{ pub.venue }}{% endif %}</p>
+    {% elif pub.venue %}
+    <p class="text-sm text-gray-500 mt-0.5">{{ pub.venue }}</p>
+    {% endif %}
+  </div>
+  {% if user.role == 'organizer' or user.role == 'admin' or user.role == 'superadmin' %}
+  <div class="flex gap-2 flex-shrink-0">
+    {% if pub.doi %}
+    <form method="post" action="{% url 'enrichment:pub_crossref' pk=pub.pk %}">
+      {% csrf_token %}
+      <button type="submit"
+              class="px-3 py-1.5 text-sm font-medium text-orange-700 bg-orange-50 border border-orange-300 rounded-md hover:bg-orange-100"
+              title="Fetch metadata from Crossref by DOI">
+        Enrich (Crossref)
+      </button>
+    </form>
+    <form method="post" action="{% url 'enrichment:pub_openalex' pk=pub.pk %}">
+      {% csrf_token %}
+      <button type="submit"
+              class="px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-300 rounded-md hover:bg-blue-100"
+              title="Fetch metadata from OpenAlex by DOI">
+        Enrich (OpenAlex)
+      </button>
+    </form>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+{% if messages %}
+<div class="mb-4 space-y-2">
+  {% for message in messages %}
+  <div class="px-4 py-2 rounded-md text-sm
+    {% if message.tags == 'error' %}bg-red-50 text-red-700
+    {% elif message.tags == 'success' %}bg-green-50 text-green-700
+    {% else %}bg-blue-50 text-blue-700{% endif %}">
+    {{ message }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 space-y-4">
+
+    <!-- Metadata -->
+    <div class="bg-white border border-gray-200 rounded-lg p-5">
+      <h2 class="text-sm font-semibold text-gray-700 mb-3">Metadata</h2>
+      <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+        {% if pub.doi %}
+        <dt class="text-gray-500">DOI</dt>
+        <dd class="font-mono text-xs">
+          <a href="https://doi.org/{{ pub.doi_normalized }}"
+             class="text-indigo-600 hover:underline" rel="noopener noreferrer">
+            {{ pub.doi }}
+          </a>
+        </dd>
+        {% endif %}
+        <dt class="text-gray-500">Year</dt>
+        <dd>{{ pub.year|default:"—" }}</dd>
+        {% if pub.venue %}
+        <dt class="text-gray-500">Venue</dt>
+        <dd>{{ pub.venue }}</dd>
+        {% endif %}
+        {% if pub.publication_type %}
+        <dt class="text-gray-500">Type</dt>
+        <dd>{{ pub.publication_type }}</dd>
+        {% endif %}
+        <dt class="text-gray-500">Source</dt>
+        <dd>{{ pub.source|default:"—" }}</dd>
+        <dt class="text-gray-500">Reviewed</dt>
+        <dd>{% if pub.is_reviewed %}Yes{% else %}No{% endif %}</dd>
+        <dt class="text-gray-500">Added</dt>
+        <dd>{{ pub.created_at|date:"Y-m-d" }}</dd>
+      </dl>
+    </div>
+
+    <!-- Authors -->
+    {% if pub.authorships.all %}
+    <div class="bg-white border border-gray-200 rounded-lg p-5">
+      <h2 class="text-sm font-semibold text-gray-700 mb-3">
+        Authors ({{ pub.authorships.count }})
+      </h2>
+      <ol class="space-y-1 text-sm list-decimal list-inside">
+        {% for auth in pub.authorships.all %}
+        <li class="flex items-center gap-2">
+          {% if auth.person %}
+          <a href="{% url 'core:person_detail' pk=auth.person.pk %}"
+             class="text-indigo-600 hover:underline">{{ auth.person.full_name }}</a>
+          {% else %}
+          <span class="text-gray-600">{{ auth.author_name|default:"(unknown)" }}</span>
+          <span class="text-xs text-gray-400">unlinked</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+    {% endif %}
+
+    <!-- Pending suggestions -->
+    {% if pending_suggestions %}
+    <div class="bg-white border border-amber-200 rounded-lg p-5">
+      <h2 class="text-sm font-semibold text-amber-700 mb-3">
+        Pending suggestions ({{ pending_suggestions.count }})
+      </h2>
+      <table class="min-w-full text-sm divide-y divide-gray-100">
+        <thead>
+          <tr class="text-left text-xs text-gray-500">
+            <th class="pb-2">Field</th>
+            <th class="pb-2">Current</th>
+            <th class="pb-2">Suggested</th>
+            <th class="pb-2">Source</th>
+            {% if user.role == 'organizer' or user.role == 'admin' or user.role == 'superadmin' %}
+            <th class="pb-2"></th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          {% for sug in pending_suggestions %}
+          <tr>
+            <td class="py-1.5 font-mono text-xs pr-3">{{ sug.field_name }}</td>
+            <td class="py-1.5 text-gray-400 line-through pr-3">{{ sug.current_value|default:"(empty)" }}</td>
+            <td class="py-1.5 text-amber-700 font-medium pr-3">{{ sug.suggested_value }}</td>
+            <td class="py-1.5 text-gray-400 text-xs pr-3">{{ sug.source }}</td>
+            {% if user.role == 'organizer' or user.role == 'admin' or user.role == 'superadmin' %}
+            <td class="py-1.5">
+              <div class="flex gap-1">
+                <form method="post" action="{% url 'metadata:suggestion_accept' pk=sug.pk %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit"
+                          class="text-xs px-2 py-0.5 bg-green-600 text-white rounded hover:bg-green-500">
+                    Accept
+                  </button>
+                </form>
+                <form method="post" action="{% url 'metadata:suggestion_reject' pk=sug.pk %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit"
+                          class="text-xs px-2 py-0.5 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                    Reject
+                  </button>
+                </form>
+              </div>
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <!-- Sidebar: enrichment log -->
+  <div class="space-y-4">
+    {% if enrichment_log %}
+    <div class="bg-white border border-gray-200 rounded-lg p-5">
+      <h2 class="text-sm font-semibold text-gray-700 mb-3">Enrichment history</h2>
+      <ul class="space-y-2 text-xs">
+        {% for entry in enrichment_log %}
+        <li class="flex items-start gap-2">
+          <span class="inline-block px-1.5 py-0.5 rounded text-xs font-medium
+            {% if entry.status == 'ok' %}bg-green-50 text-green-700
+            {% elif entry.status == 'error' %}bg-red-50 text-red-700
+            {% else %}bg-gray-100 text-gray-500{% endif %}">
+            {{ entry.status }}
+          </span>
+          <div>
+            <span class="font-medium">{{ entry.source }}</span>
+            {% if entry.suggestions_created %} &mdash; {{ entry.suggestions_created }} suggestion(s){% endif %}
+            {% if entry.error_message %}<br><span class="text-red-500">{{ entry.error_message|truncatechars:80 }}</span>{% endif %}
+            <br><span class="text-gray-400">{{ entry.fetched_at|date:"Y-m-d H:i" }}</span>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% else %}
+    {% if pub.doi and user.role != 'viewer' %}
+    <div class="bg-gray-50 border border-dashed border-gray-200 rounded-lg p-5 text-center">
+      <p class="text-xs text-gray-500 mb-2">No enrichment runs yet.</p>
+      <p class="text-xs text-gray-400">Use Enrich buttons above to fetch metadata from Crossref or OpenAlex.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

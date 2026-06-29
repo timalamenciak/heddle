@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Pending suggestions — heddle{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-xl font-semibold text-gray-800">Pending suggestions</h1>
+    <p class="text-sm text-gray-500 mt-0.5">
+      {{ open_count }} open &mdash; {{ high_confidence }} eligible for bulk accept
+    </p>
+  </div>
+  {% if can_act and high_confidence > 0 %}
+  <form method="post" action="{% url 'metadata:suggestion_bulk_accept' %}">
+    {% csrf_token %}
+    <button type="submit"
+            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-500">
+      Bulk accept {{ high_confidence }} low-risk
+    </button>
+  </form>
+  {% endif %}
+</div>
+
+{% if suggestions %}
+<div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="px-4 py-3 text-left font-medium text-gray-500">Person / Org</th>
+        <th class="px-4 py-3 text-left font-medium text-gray-500">Field</th>
+        <th class="px-4 py-3 text-left font-medium text-gray-500">Current</th>
+        <th class="px-4 py-3 text-left font-medium text-gray-500">Suggested</th>
+        <th class="px-4 py-3 text-left font-medium text-gray-500">Source</th>
+        <th class="px-4 py-3 text-left font-medium text-gray-500">Confidence</th>
+        {% if can_act %}<th class="px-4 py-3"></th>{% endif %}
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for sug in suggestions %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-3 font-medium text-gray-800">
+          {% if sug.person %}
+          <a href="{% url 'core:person_detail' pk=sug.person.pk %}"
+             class="text-indigo-600 hover:underline">{{ sug.person }}</a>
+          {% elif sug.organization %}
+          <a href="{% url 'core:organization_detail' pk=sug.organization.pk %}"
+             class="text-indigo-600 hover:underline">{{ sug.organization }}</a>
+          {% elif sug.publication %}
+          <a href="{% url 'core:publication_detail' pk=sug.publication.pk %}"
+             class="text-indigo-600 hover:underline">{{ sug.publication.title|truncatechars:50 }}</a>
+          {% endif %}
+        </td>
+        <td class="px-4 py-3 text-gray-700 font-mono text-xs">{{ sug.field_name }}</td>
+        <td class="px-4 py-3 text-gray-500 line-through">{{ sug.current_value|default:"(empty)" }}</td>
+        <td class="px-4 py-3 text-amber-700 font-medium">{{ sug.suggested_value }}</td>
+        <td class="px-4 py-3 text-gray-500 text-xs">{{ sug.source }}</td>
+        <td class="px-4 py-3 text-gray-500 text-xs">{{ sug.confidence_score|floatformat:2 }}</td>
+        {% if can_act %}
+        <td class="px-4 py-3">
+          <div class="flex gap-2">
+            <form method="post" action="{% url 'metadata:suggestion_accept' pk=sug.pk %}">
+              {% csrf_token %}
+              <button type="submit"
+                      class="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-500">
+                Accept
+              </button>
+            </form>
+            <form method="post" action="{% url 'metadata:suggestion_reject' pk=sug.pk %}">
+              {% csrf_token %}
+              <button type="submit"
+                      class="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                Reject
+              </button>
+            </form>
+          </div>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="text-center py-16 text-gray-400">
+  <p class="text-sm">No pending suggestions. Run a sync to generate some.</p>
+</div>
+{% endif %}
+{% endblock %}

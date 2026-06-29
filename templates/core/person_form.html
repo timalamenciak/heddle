@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} person — heddle{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
+  <a href="{% url 'accounts:dashboard' %}" class="hover:text-indigo-600">Home</a>
+  <span>/</span>
+  <a href="{% url 'core:person_list' %}" class="hover:text-indigo-600">People</a>
+  <span>/</span>
+  {% if person %}
+  <a href="{% url 'core:person_detail' pk=person.pk %}" class="hover:text-indigo-600">{{ person.full_name }}</a>
+  <span>/</span>
+  <span class="text-gray-600">Edit</span>
+  {% else %}
+  <span class="text-gray-600">Add person</span>
+  {% endif %}
+</nav>
+<div class="mb-6">
+  <h1 class="text-xl font-semibold text-gray-800">{{ action }} person</h1>
+  {% if person %}
+  <p class="text-sm text-gray-500 mt-0.5">{{ person.full_name }}</p>
+  {% endif %}
+</div>
+
+<form method="post" class="max-w-2xl space-y-6">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+  <div class="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+    {{ form.non_field_errors }}
+  </div>
+  {% endif %}
+
+  <div class="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
+    <h2 class="text-sm font-semibold text-gray-700">Identity</h2>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.given_name.label }}</label>
+        {{ form.given_name }}
+        {% if form.given_name.errors %}<p class="text-xs text-red-600 mt-1">{{ form.given_name.errors.0 }}</p>{% endif %}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.family_name.label }}</label>
+        {{ form.family_name }}
+        {% if form.family_name.errors %}<p class="text-xs text-red-600 mt-1">{{ form.family_name.errors.0 }}</p>{% endif %}
+      </div>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.orcid.label }}</label>
+      {{ form.orcid }}
+      <p class="text-xs text-gray-400 mt-0.5">{{ form.orcid.help_text }}</p>
+      {% if form.orcid.errors %}<p class="text-xs text-red-600 mt-1">{{ form.orcid.errors.0 }}</p>{% endif %}
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
+    <h2 class="text-sm font-semibold text-gray-700">Affiliation</h2>
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.organization.label }}</label>
+      {{ form.organization }}
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.organization_role.label }}</label>
+      {{ form.organization_role }}
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
+    <h2 class="text-sm font-semibold text-gray-700">Location</h2>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.country.label }}</label>
+        {{ form.country }}
+        <p class="text-xs text-gray-400 mt-0.5">{{ form.country.help_text }}</p>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.continent.label }}</label>
+        {{ form.continent }}
+      </div>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.website.label }}</label>
+      {{ form.website }}
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
+    <h2 class="text-sm font-semibold text-gray-700">Notes &amp; consent</h2>
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.notes.label }}</label>
+      {{ form.notes }}
+    </div>
+    {% if form.notes_private %}
+    <div>
+      <label class="block text-xs font-medium text-orange-600 mb-1">{{ form.notes_private.label }}</label>
+      {{ form.notes_private }}
+      <p class="text-xs text-gray-400 mt-0.5">{{ form.notes_private.help_text }}</p>
+    </div>
+    {% endif %}
+    <div class="flex gap-6">
+      <label class="flex items-center gap-2 text-sm text-gray-700">
+        {{ form.consent_contact }} {{ form.consent_contact.label }}
+      </label>
+      <label class="flex items-center gap-2 text-sm text-gray-700">
+        {{ form.consent_public_profile }} {{ form.consent_public_profile.label }}
+      </label>
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
+    <h2 class="text-sm font-semibold text-gray-700">Metadata</h2>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.metadata_status.label }}</label>
+        {{ form.metadata_status }}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.source.label }}</label>
+        {{ form.source }}
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <button type="submit"
+            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500">
+      Save
+    </button>
+    {% if person %}
+    <a href="{% url 'core:person_detail' pk=person.pk %}"
+       class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">
+      Cancel
+    </a>
+    {% else %}
+    <a href="{% url 'core:person_list' %}"
+       class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">
+      Cancel
+    </a>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

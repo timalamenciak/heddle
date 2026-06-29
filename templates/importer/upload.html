@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Import CSV — heddle{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-xl font-semibold text-gray-800">Import CSV</h1>
+  <p class="text-sm text-gray-500 mt-1">
+    Upload a UTF-8 CSV file. You'll map columns and preview changes before anything is written.
+  </p>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="max-w-lg space-y-5">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+  <div class="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+    {{ form.non_field_errors }}
+  </div>
+  {% endif %}
+
+  <div class="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.file.label }}</label>
+      {{ form.file }}
+      <p class="text-xs text-gray-400 mt-1">{{ form.file.help_text }}</p>
+      {% if form.file.errors %}<p class="text-xs text-red-600 mt-1">{{ form.file.errors.0 }}</p>{% endif %}
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.source_label.label }}</label>
+      {{ form.source_label }}
+      <p class="text-xs text-gray-400 mt-1">{{ form.source_label.help_text }}</p>
+    </div>
+  </div>
+
+  <div>
+    <button type="submit"
+            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500">
+      Upload and continue →
+    </button>
+  </div>
+</form>
+{% endblock %}

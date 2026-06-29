@@ -1,0 +1,64 @@
+{% if page.object_list %}
+<div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Organization</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Country</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ORCID</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for person in page.object_list %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-3">
+          <a href="{% url 'core:person_detail' pk=person.pk %}"
+             class="font-medium text-indigo-600 hover:text-indigo-500">
+            {{ person.full_name }}
+          </a>
+        </td>
+        <td class="px-4 py-3 text-gray-700">
+          {% with org=person.primary_organization %}
+            {% if org %}{{ org }}{% else %}<span class="text-gray-400">—</span>{% endif %}
+          {% endwith %}
+        </td>
+        <td class="px-4 py-3 text-gray-700">{{ person.country|default:"—" }}</td>
+        <td class="px-4 py-3 text-gray-500 font-mono text-xs">
+          {{ person.orcid|default:"—" }}
+        </td>
+        <td class="px-4 py-3">
+          <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+            {% if person.metadata_status == 'verified' %}bg-green-50 text-green-700
+            {% elif person.metadata_status == 'needs_review' %}bg-yellow-50 text-yellow-700
+            {% elif person.metadata_status == 'stale' %}bg-orange-50 text-orange-700
+            {% else %}bg-gray-100 text-gray-600{% endif %}">
+            {{ person.get_metadata_status_display }}
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if page.has_other_pages %}
+<div class="flex items-center justify-between mt-4 text-sm text-gray-600">
+  <span>Page {{ page.number }} of {{ paginator.num_pages }}</span>
+  <div class="flex gap-2">
+    {% if page.has_previous %}
+    <a href="?{% querystring page=page.previous_page_number %}"
+       class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">Previous</a>
+    {% endif %}
+    {% if page.has_next %}
+    <a href="?{% querystring page=page.next_page_number %}"
+       class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">Next</a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% else %}
+<p class="text-gray-500 text-sm py-8 text-center">No people found matching your filters.</p>
+{% endif %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} organization — heddle{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-xl font-semibold text-gray-800">{{ action }} organization</h1>
+  {% if org %}<p class="text-sm text-gray-500 mt-0.5">{{ org.name }}</p>{% endif %}
+</div>
+
+<form method="post" class="max-w-2xl space-y-6">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+  <div class="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+    {{ form.non_field_errors }}
+  </div>
+  {% endif %}
+
+  <div class="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
+    <h2 class="text-sm font-semibold text-gray-700">Basic info</h2>
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.name.label }}</label>
+      {{ form.name }}
+      {% if form.name.errors %}<p class="text-xs text-red-600 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.org_type.label }}</label>
+        {{ form.org_type }}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.ror_id.label }}</label>
+        {{ form.ror_id }}
+        <p class="text-xs text-gray-400 mt-0.5">{{ form.ror_id.help_text }}</p>
+      </div>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.website.label }}</label>
+      {{ form.website }}
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
+    <h2 class="text-sm font-semibold text-gray-700">Location</h2>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.country.label }}</label>
+        {{ form.country }}
+        <p class="text-xs text-gray-400 mt-0.5">{{ form.country.help_text }}</p>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.continent.label }}</label>
+        {{ form.continent }}
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
+    <h2 class="text-sm font-semibold text-gray-700">Metadata</h2>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.metadata_status.label }}</label>
+        {{ form.metadata_status }}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.source.label }}</label>
+        {{ form.source }}
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <button type="submit"
+            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500">
+      Save
+    </button>
+    {% if org %}
+    <a href="{% url 'core:organization_detail' pk=org.pk %}"
+       class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">Cancel</a>
+    {% else %}
+    <a href="{% url 'core:organization_list' %}"
+       class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">Cancel</a>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

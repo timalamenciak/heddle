@@ -1,0 +1,36 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py", "*_tests.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "S", "C90"]
+ignore = [
+    "S101",   # use of assert is fine in tests
+    "S105",   # hardcoded passwords — dev defaults are intentional
+    "S106",
+    "UP007",  # X | Y union syntax — keep Optional for clarity
+]
+
+[tool.ruff.lint.per-file-ignores]
+"*/migrations/*.py" = ["E501", "N806"]
+"*/tests/*.py" = ["S101", "S106"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 20
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main"]
+python_version = "3.12"
+strict = false
+ignore_missing_imports = true
+exclude = ["(^|[\\\\/])migrations[\\\\/]"]
+
+[tool.django-stubs]
+django_settings_module = "config.settings.development"

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Events — heddle{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-semibold">Events</h1>
+  {% if user.role != 'viewer' and user.role != 'contributor' %}
+  <a href="{% url 'events:event_create' %}"
+     class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+    New event
+  </a>
+  {% endif %}
+</div>
+
+{% if events %}
+<div class="overflow-x-auto rounded-lg border border-gray-200">
+  <table class="min-w-full text-sm">
+    <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+      <tr>
+        <th class="px-4 py-3">Name</th>
+        <th class="px-4 py-3">Type</th>
+        <th class="px-4 py-3">Start date</th>
+        <th class="px-4 py-3">Location</th>
+        <th class="px-4 py-3">Participants</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100 bg-white">
+      {% for event in events %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-3 font-medium">
+          <a href="{% url 'events:event_detail' pk=event.pk %}"
+             class="text-indigo-600 hover:underline">{{ event.name }}</a>
+        </td>
+        <td class="px-4 py-3 text-gray-600">{{ event.get_event_type_display }}</td>
+        <td class="px-4 py-3 text-gray-600">{{ event.start_date }}</td>
+        <td class="px-4 py-3 text-gray-600">{{ event.location|default:"—" }}</td>
+        <td class="px-4 py-3 text-gray-600">{{ event.participations.count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="rounded-lg border border-dashed border-gray-300 py-16 text-center text-gray-500">
+  No events yet.
+  {% if user.role != 'viewer' and user.role != 'contributor' %}
+  <a href="{% url 'events:event_create' %}" class="ml-1 text-indigo-600 hover:underline">Create the first one.</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

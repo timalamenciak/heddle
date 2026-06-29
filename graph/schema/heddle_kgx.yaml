@@ -1,0 +1,112 @@
+id: https://heddle.example.org/schema/kgx
+name: heddle-kgx
+description: >
+  LinkML schema for heddle KGX exports.
+  Defines allowed Biolink node categories and edge predicates.
+  The Python validator (graph/validators.py) mirrors these definitions.
+version: "1.0"
+
+prefixes:
+  linkml: "https://w3id.org/linkml/"
+  biolink: "https://w3id.org/biolink/vocab/"
+  heddle: "https://heddle.example.org/"
+  ORCID: "https://orcid.org/"
+  ROR: "https://ror.org/"
+  doi: "https://doi.org/"
+
+imports:
+  - linkml:types
+
+default_prefix: heddle
+default_range: string
+
+# ── Node categories ──────────────────────────────────────────────────────────
+
+classes:
+  Node:
+    description: A KGX graph node.
+    slots:
+      - id
+      - category
+      - name
+      - orcid
+      - country
+      - year
+      - knowledge_source
+
+  Edge:
+    description: A KGX directed edge.
+    slots:
+      - id
+      - subject
+      - predicate
+      - object
+      - knowledge_source
+
+slots:
+  id:
+    required: true
+    description: >
+      Compact URI (CURIE) identifier.
+      Schemes used: ORCID:, ROR:, doi:, heddle:person/, heddle:org/,
+      heddle:pub/, heddle:event/, heddle:anon/ (anonymised), heddle:edge/
+
+  category:
+    required: true
+    description: Biolink node category CURIE.
+    range: NodeCategory
+
+  name:
+    description: Human-readable label (empty for anonymised Person nodes is a warning).
+
+  orcid:
+    description: ORCID iD in bare 0000-0000-0000-000X format. Empty for non-Person nodes.
+
+  country:
+    description: ISO 3166-1 alpha-2 country code.
+
+  year:
+    description: Publication year (Publication nodes) or event year (Event nodes).
+
+  knowledge_source:
+    description: Provenance. Always "heddle" for records originating here.
+
+  subject:
+    required: true
+    description: Node id of the edge subject.
+
+  predicate:
+    required: true
+    description: Biolink predicate CURIE.
+    range: EdgePredicate
+
+  object:
+    required: true
+    description: Node id of the edge object.
+
+# ── Enumerations ─────────────────────────────────────────────────────────────
+
+enums:
+  NodeCategory:
+    description: Allowed Biolink node categories in heddle KGX exports.
+    permissible_values:
+      biolink:Person:
+        description: A human researcher, contributor, or participant.
+      biolink:Organization:
+        description: An institution, university, NGO, or government body.
+      biolink:Publication:
+        description: A journal article, conference paper, preprint, or report.
+      biolink:Event:
+        description: A workshop, hackathon, conference, or webinar.
+
+  EdgePredicate:
+    description: Allowed Biolink edge predicates in heddle KGX exports.
+    permissible_values:
+      biolink:affiliated_with:
+        description: Person → Organization affiliation.
+      biolink:contributes_to:
+        description: Person → Publication authorship.
+      biolink:related_to:
+        description: Person ↔ Person coauthorship (Collaboration edge).
+      biolink:participates_in:
+        description: Person → Event participation.
