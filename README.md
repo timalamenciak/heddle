@@ -1,8 +1,8 @@
 # Heddle
 
-Heddle is a self-hosted engagement CRM and metadata-quality platform for the
-EcoWeaver research project. It keeps provenance-tracked records of people,
-organizations, expertise, events, participation, publications, and
+Heddle is a self-hosted engagement manager made for the EcoWeaver project. 
+It keeps provenance-tracked records of people, organizations, expertise, 
+events, participation, publications, and
 collaborations, then produces privacy-aware CSV and KGX exports for research
 workflows.
 
@@ -13,11 +13,7 @@ untraceable, which undermines reproducible network analysis and responsible
 engagement. Unlike general-purpose CRMs, Heddle makes provenance, verification,
 consent, and explainable quality scores part of the workflow.
 
-Related software includes EcoWeaver and its CAMO/ELMO ontology stack,
-`rosettaR` for KGX/Rosetta conversion, and public metadata services such as
-ORCID, Crossref, OpenAlex, Wikidata, and ROR. Heddle does not replace those
-systems: it stages their findings as human-reviewed suggestions and exports
-validated records downstream.
+This is mainly an internal tool, but putting here in case others want it.
 
 ## Quick start with Docker
 
