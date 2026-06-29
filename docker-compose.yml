@@ -23,7 +23,7 @@ services:
     volumes:
       - .:/app
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:18484:8000"
     init: true
     security_opt:
       - no-new-privileges:true
