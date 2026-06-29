@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 COPY . .
 
 # Collect static assets (placeholder creds; no DB touched during collectstatic)
-RUN SECRET_KEY=collectstatic-placeholder \
+RUN SECRET_KEY=collectstatic-placeholder-build-only-not-a-real-secret-xxxxxxxxxxx \
     DATABASE_URL=postgres://x:x@localhost/x \
     ALLOWED_HOSTS=localhost \
     DJANGO_SETTINGS_MODULE=config.settings.production \
